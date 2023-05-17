@@ -1,0 +1,53 @@
+version: '3.9'
+services:
+  device-enrollment:
+    container_name: device-enrollment
+    command: python main.py
+    build:
+      context: .
+      dockerfile: device-enrollment/Dockerfile
+    network_mode: host
+    depends_on:
+      - device-registry
+
+  device-registry:
+    container_name: device-registry
+    command: python main.py
+    build:
+      context: .
+      dockerfile: device-registry/Dockerfile
+    network_mode: host
+
+  device:
+    container_name: device
+    command: python main.py
+    build:
+      context: .
+      dockerfile: device/Dockerfile
+    network_mode: host
+    depends_on:
+      - mosquitto
+
+  device-gateway:
+    container_name: device-gateway
+    command: python main.py
+    build:
+      context: .
+      dockerfile: device-gateway/Dockerfile
+    network_mode: host
+    depends_on:
+      - mosquitto
+
+  mosquitto:
+    image: eclipse-mosquitto
+    container_name: mosquitto
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+    ports:
+      - 1883:1883
+      - 9001:9001
+
+volumes:
+  data:
